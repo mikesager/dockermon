@@ -22,10 +22,10 @@ setup(
     version=version(),
     description='docker monitor using docker /events HTTP streaming API',
     long_description=readme(),
-    author='CyberInt',
-    author_email='tools@cyberint.com',
+    author='CyberInt + mikesager',
+    author_email='mike@mikesager.name',
     license='MIT',
-    url='https://github.com/CyberInt/dockermon',
+    url='https://github.com/mikesager/dockermon',
     py_modules=['dockermon'],
     tests_require=['nose', 'flake8', 'tox'],
     classifiers=[

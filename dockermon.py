@@ -3,7 +3,9 @@
 
 from contextlib import closing
 from functools import partial
-from socket import socket, AF_UNIX
+import re
+from socket import AF_UNIX
+import socket
 from subprocess import Popen, PIPE
 from sys import stdout, version_info
 import json
@@ -16,10 +18,10 @@ else:
     from http.client import OK as HTTP_OK
     from urllib.parse import urlparse
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 bufsize = 1024
 default_sock_url = 'ipc:///var/run/docker.sock'
-
+ipregex=re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 
 class DockermonError(Exception):
     pass
@@ -54,17 +56,20 @@ def connect(url):
     """
     url = urlparse(url)
     if url.scheme == 'tcp':
-        sock = socket()
-        netloc = tuple(url.netloc.rsplit(':', 1))
-        hostname = socket.gethostname()
+        host, port = url.netloc.rsplit(':', 1)
+        if ipregex.match(host):
+            hostname = socket.gethostbyaddr(host)[0]
+        else:
+            hostname = host
+        sock = socket.create_connection((host, port))
     elif url.scheme == 'ipc':
-        sock = socket(AF_UNIX)
+        sock = socket.socket(AF_UNIX)
         netloc = url.path
         hostname = 'localhost'
+        sock.connect(netloc)
     else:
         raise ValueError('unknown socket type: %s' % url.scheme)
 
-    sock.connect(netloc)
     return sock, hostname
 
 
